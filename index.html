@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bơi Hia</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bơi Hia">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#06142b">
+<style>
+:root{--s:8px;--bg:#06142b;--bg2:#0b2347;--card:#0f2d57;--line:#1b4373;--tx:#eaf6ff;--mut:#8fb0cf;--aq:#2be4d6;--bl:#2f8bff;--ok:#34d399;--warn:#fbbf24;--no:#fb7185;--r:20px}
+@media(prefers-color-scheme:light){:root{--bg:#eaf6ff;--bg2:#d6ecfb;--card:#fff;--line:#c4dcee;--tx:#06223f;--mut:#56738f;--aq:#0bb8ab;--bl:#1f6fe0}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0}
+html,body{background:var(--bg);color:var(--tx);font:16px/24px -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif}
+body{min-height:100dvh;padding-bottom:calc(var(--s)*12 + env(safe-area-inset-bottom))}
+.hero{position:relative;overflow:hidden;padding:calc(env(safe-area-inset-top) + 24px) 24px 56px;background:linear-gradient(160deg,var(--bg2),var(--bl) 140%)}
+.hero h1{font-size:32px;line-height:40px;font-weight:800;letter-spacing:-.5px}
+.hero p{color:var(--mut);margin-top:var(--s)}
+.hero .bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;min-height:40px}
+.hero .bar b{font-weight:600;color:var(--mut)}
+.wave{position:absolute;left:0;bottom:-1px;width:200%;height:32px;animation:w 9s linear infinite}
+.wave path{fill:var(--bg)}
+@keyframes w{to{transform:translateX(-50%)}}
+main{padding:0 16px;margin-top:-8px;display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.ev{display:grid;grid-template-columns:56px 1fr auto;gap:16px;align-items:center;cursor:pointer;transition:transform .15s}
+.ev:active{transform:scale(.98)}
+.date{width:56px;height:64px;border-radius:16px;background:linear-gradient(160deg,var(--aq),var(--bl));color:#031428;text-align:center;display:grid;align-content:center}
+.date b{font-size:24px;line-height:28px;font-weight:800}.date span{font-size:12px;line-height:16px;font-weight:700;text-transform:uppercase}
+.ev h3{font-size:17px;line-height:24px;font-weight:700}
+.ev small,.mut{color:var(--mut);font-size:14px;line-height:20px}
+.chip{display:inline-block;padding:0 12px;border-radius:99px;font-size:13px;line-height:24px;font-weight:700;border:1px solid var(--line);color:var(--mut)}
+.chip.going{background:var(--ok);color:#042;border-color:var(--ok)}.chip.maybe{background:var(--warn);color:#432;border-color:var(--warn)}.chip.no{background:var(--no);color:#400;border-color:var(--no)}
+.btn{display:block;width:100%;height:56px;border:0;border-radius:16px;font:700 17px/24px inherit;font-family:inherit;color:#031428;background:linear-gradient(90deg,var(--aq),var(--bl));cursor:pointer;transition:transform .15s,opacity .15s}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.5}
+.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--no);border:1px solid var(--no)}
+.btn.sm{height:40px;font-size:15px;width:auto;padding:0 16px}
+.icon{border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--tx);height:40px;min-width:40px;padding:0 12px;border-radius:99px;font:600 15px inherit;font-family:inherit;cursor:pointer}
+input,textarea{width:100%;height:56px;border-radius:16px;border:1px solid var(--line);background:var(--bg);color:var(--tx);padding:0 16px;font:inherit;outline:0}
+textarea{height:96px;padding:16px;resize:none}
+input:focus,textarea:focus{border-color:var(--aq);box-shadow:0 0 0 3px color-mix(in srgb,var(--aq) 25%,transparent)}
+label{display:grid;gap:8px;font-weight:600;font-size:14px;color:var(--mut)}
+.form{display:grid;gap:16px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{height:56px;border-radius:16px;border:1px solid var(--line);background:transparent;color:var(--tx);font:600 15px inherit;font-family:inherit;cursor:pointer;transition:all .15s}
+.seg button.on[data-s=going]{background:var(--ok);color:#042;border-color:var(--ok)}
+.seg button.on[data-s=maybe]{background:var(--warn);color:#432;border-color:var(--warn)}
+.seg button.on[data-s=no]{background:var(--no);color:#400;border-color:var(--no)}
+h2{font-size:20px;line-height:28px;font-weight:800;margin-bottom:16px}
+.opt{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center;height:56px;padding:0 16px;border-radius:16px;border:1px solid var(--line);margin-bottom:8px;cursor:pointer;font-weight:600}
+.opt i{position:absolute;inset:0 auto 0 0;background:color-mix(in srgb,var(--aq) 22%,transparent);transition:width .4s;z-index:0}
+.opt span{position:relative;z-index:1}
+.opt.mine{border-color:var(--aq)}.opt.win{border-color:var(--warn);box-shadow:0 0 0 2px color-mix(in srgb,var(--warn) 40%,transparent)}
+.row{display:flex;gap:8px;align-items:center}.row>input{flex:1}
+.people{display:flex;flex-wrap:wrap;gap:8px}
+.back{margin-bottom:0}
+.empty{text-align:center;color:var(--mut);padding:32px 16px}
+.mem{display:flex;justify-content:space-between;align-items:center;min-height:40px}
+.fab{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:5}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 16px);transform:translate(-50%,-80px);background:var(--card);border:1px solid var(--line);padding:8px 16px;border-radius:99px;font-weight:600;transition:transform .3s;z-index:9}
+.toast.on{transform:translate(-50%,0)}
+.fade{animation:f .25s ease-out}@keyframes f{from{opacity:0;transform:translateY(8px)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = s => document.querySelector(s), app = $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = p => { p = p.replace(/\D/g, ''); return p.startsWith('84') ? '0' + p.slice(2) : p };
+let me = JSON.parse(localStorage.me || 'null');
+const isAdmin = () => me && me.phone === norm(ADMIN_PHONE);
+const WAVE = '<svg class="wave" viewBox="0 0 1200 32" preserveAspectRatio="none"><path d="M0 16C100 0 200 0 300 16S500 32 600 16s200-16 300 0 200 16 300 0V32H0Z"/></svg>';
+const dt = s => new Date(s).toLocaleString('vi-VN', { weekday: 'short', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+const LBL = { going: 'Đi', maybe: 'Có thể', no: 'Bận' };
+let t;
+const toast = m => { const e = $('#toast'); e.textContent = m; e.classList.add('on'); clearTimeout(t); t = setTimeout(() => e.classList.remove('on'), 2200) };
+const fail = e => toast('Lỗi: ' + (e?.message || 'thử lại nhé'));
+const hero = (title, sub, left) => `<div class="hero"><div class="bar">${left}<b>${esc(me?.name || '')}${isAdmin() ? ' · Admin' : ''}</b></div><h1>${title}</h1>${sub ? `<p>${sub}</p>` : ''}${WAVE}</div>`;
+
+/* ---------- Đăng nhập ---------- */
+function login() {
+  app.innerHTML = `<div class="hero"><h1>Bơi Hia 🏊</h1><p>Hội bơi lội &amp; bia sau bơi</p>${WAVE}</div>
+  <main class="fade"><form class="card form" id="f">
+    <label>Số điện thoại<input id="p" type="tel" inputmode="tel" placeholder="0901234567" autocomplete="tel" required></label>
+    <label>Tên của bạn (lần đầu)<input id="n" placeholder="Ví dụ: Hia Tuấn" maxlength="24"></label>
+    <button class="btn">Vào hội</button></form></main>`;
+  $('#f').onsubmit = async e => {
+    e.preventDefault();
+    const phone = norm($('#p').value), name = $('#n').value.trim();
+    if (!/^0\d{9}$/.test(phone)) return toast('Số điện thoại gồm 10 chữ số');
+    let { data: m, error } = await db.from('members').select('*').eq('phone', phone).maybeSingle();
+    if (error) return fail(error);
+    if (!m) {
+      if (!name) return toast('Lần đầu cần nhập tên');
+      ({ data: m, error } = await db.from('members').insert({ phone, name }).select().single());
+      if (error) return fail(error);
+    }
+    me = m; localStorage.me = JSON.stringify(m); home();
+  };
+}
+
+/* ---------- Danh sách sự kiện ---------- */
+async function home() {
+  const [{ data: evs, error }, { data: rs }] = await Promise.all([
+    db.from('events').select('*').order('starts_at'), db.from('rsvps').select('*')]);
+  if (error) return fail(error);
+  const mine = Object.fromEntries((rs || []).filter(r => r.phone === me.phone).map(r => [r.event_id, r.status]));
+  const going = {}; (rs || []).filter(r => r.status === 'going').forEach(r => going[r.event_id] = (going[r.event_id] || 0) + 1);
+  const now = Date.now() - 864e5;
+  const up = evs.filter(e => +new Date(e.starts_at) >= now), past = evs.filter(e => +new Date(e.starts_at) < now).reverse();
+  const card = e => { const d = new Date(e.starts_at); return `<div class="card ev" data-id="${e.id}">
+    <div class="date"><b>${d.getDate()}</b><span>Th${d.getMonth() + 1}</span></div>
+    <div><h3>${esc(e.title)}</h3><small>${d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · ${esc(e.place || 'Chưa có địa điểm')}</small><br><small>🏊 ${going[e.id] || 0} người đi${e.vote_closed ? ' · 🍺 đã chốt' : ''}</small></div>
+    ${mine[e.id] ? `<span class="chip ${mine[e.id]}">${LBL[mine[e.id]]}</span>` : '<span class="chip">Chưa trả lời</span>'}</div>` };
+  app.innerHTML = hero('Lịch bơi', `${up.length} sự kiện sắp tới`,
+    `<button class="icon" id="out">Thoát</button>${isAdmin() ? '<button class="icon" id="mem">👥 Thành viên</button>' : ''}`) +
+    `<main class="fade">${up.map(card).join('') || '<div class="card empty">Chưa có sự kiện nào 🌊</div>'}
+    ${past.length ? `<p class="mut" style="margin-top:8px">Đã qua</p>${past.map(card).join('')}` : ''}</main>
+    ${isAdmin() ? '<div class="fab"><button class="btn" id="new">+ Tạo sự kiện</button></div>' : ''}`;
+  app.querySelectorAll('.ev').forEach(c => c.onclick = () => event(c.dataset.id));
+  $('#out').onclick = () => { localStorage.removeItem('me'); me = null; login() };
+  if (isAdmin()) { $('#new').onclick = create; $('#mem').onclick = members }
+}
+
+/* ---------- Tạo sự kiện (admin) ---------- */
+function create() {
+  app.innerHTML = hero('Sự kiện mới', '', '<button class="icon" id="b">← Lịch</button>') + `<main class="fade"><form class="card form" id="f">
+    <label>Tên<input id="t" placeholder="Bơi sáng Chủ nhật" required maxlength="60"></label>
+    <label>Ngày giờ<input id="d" type="datetime-local" required></label>
+    <label>Địa điểm<input id="pl" placeholder="Hồ bơi..." maxlength="80"></label>
+    <label>Ghi chú<textarea id="no" maxlength="300"></textarea></label>
+    <button class="btn">Tạo</button></form></main>`;
+  $('#b').onclick = home;
+  $('#f').onsubmit = async e => {
+    e.preventDefault();
+    const { data, error } = await db.from('events').insert({ title: $('#t').value.trim(), starts_at: new Date($('#d').value).toISOString(), place: $('#pl').value.trim(), note: $('#no').value.trim() }).select().single();
+    if (error) return fail(error); toast('Đã tạo ✓'); event(data.id);
+  };
+}
+
+/* ---------- Chi tiết sự kiện + vote bia ---------- */
+async function event(id) {
+  const [{ data: e }, { data: rs }, { data: os }, { data: vs }] = await Promise.all([
+    db.from('events').select('*').eq('id', id).single(),
+    db.from('rsvps').select('*, members(name)').eq('event_id', id),
+    db.from('options').select('*').eq('event_id', id).order('created_at'),
+    db.from('votes').select('*').eq('event_id', id)]);
+  if (!e) return home();
+  const my = rs.find(r => r.phone === me.phone)?.status, myVote = vs.find(v => v.phone === me.phone)?.option_id;
+  const cnt = Object.fromEntries(os.map(o => [o.id, vs.filter(v => v.option_id === o.id).length]));
+  const max = Math.max(0, ...Object.values(cnt)), total = vs.length || 1;
+  const who = s => rs.filter(r => r.status === s).map(r => `<span class="chip ${s}">${esc(r.members?.name)}</span>`).join('') || '<span class="mut">—</span>';
+  app.innerHTML = hero(esc(e.title), `${dt(e.starts_at)} · ${esc(e.place || 'Chưa có địa điểm')}`, '<button class="icon" id="b">← Lịch</button>') +
+  `<main class="fade">
+    ${e.note ? `<div class="card mut">${esc(e.note)}</div>` : ''}
+    <div class="card"><h2>Bạn đi không?</h2><div class="seg">${['going', 'maybe', 'no'].map(s => `<button data-s="${s}" class="${my === s ? 'on' : ''}">${{ going: '🏊 Đi', maybe: '🤔 Có thể', no: '😴 Bận' }[s]}</button>`).join('')}</div></div>
+    <div class="card"><h2>Ai đi</h2><div class="people">${who('going')}</div>
+      <p class="mut" style="margin:16px 0 8px">Có thể</p><div class="people">${who('maybe')}</div>
+      <p class="mut" style="margin:16px 0 8px">Bận</p><div class="people">${who('no')}</div></div>
+    <div class="card"><h2>🍺 Đi uống bia ở đâu?</h2>
+      ${os.map(o => `<div class="opt ${myVote === o.id ? 'mine' : ''} ${e.vote_closed && cnt[o.id] === max && max ? 'win' : ''}" data-o="${o.id}"><i style="width:${cnt[o.id] / total * 100}%"></i><span>${e.vote_closed && cnt[o.id] === max && max ? '🍺 ' : myVote === o.id ? '✓ ' : ''}${esc(o.label)}</span><span>${cnt[o.id]}</span></div>`).join('') || '<p class="mut" style="margin-bottom:8px">Chưa có lựa chọn. Thêm đi nào!</p>'}
+      ${e.vote_closed ? '<p class="mut">Đã chốt vote.</p>' : `<form class="row" id="af" style="margin-top:16px"><input id="ol" placeholder="Quán / giờ..." maxlength="60" required><button class="btn sm">Thêm</button></form>`}
+    </div>
+    ${isAdmin() ? `<div class="card form"><button class="btn ghost" id="cl">${e.vote_closed ? 'Mở lại vote' : '🔒 Chốt vote'}</button><button class="btn danger" id="del">Xoá sự kiện</button></div>` : ''}
+  </main>`;
+  $('#b').onclick = home;
+  app.querySelectorAll('.seg button').forEach(b => b.onclick = async () => {
+    const { error } = await db.from('rsvps').upsert({ event_id: id, phone: me.phone, status: b.dataset.s }); error ? fail(error) : event(id) });
+  app.querySelectorAll('.opt').forEach(o => o.onclick = async () => {
+    if (e.vote_closed) return toast('Vote đã chốt');
+    const { error } = await db.from('votes').upsert({ event_id: id, phone: me.phone, option_id: o.dataset.o }); error ? fail(error) : event(id) });
+  if (!e.vote_closed) $('#af').onsubmit = async ev => { ev.preventDefault();
+    const { error } = await db.from('options').insert({ event_id: id, label: $('#ol').value.trim(), added_by: me.phone }); error ? fail(error) : event(id) };
+  if (isAdmin()) {
+    $('#cl').onclick = async () => { const { error } = await db.from('events').update({ vote_closed: !e.vote_closed }).eq('id', id); error ? fail(error) : event(id) };
+    $('#del').onclick = async () => { if (!confirm('Xoá sự kiện này? Không hoàn tác được.')) return;
+      const { error } = await db.from('events').delete().eq('id', id); error ? fail(error) : home() };
+  }
+}
+
+/* ---------- Thành viên (admin) ---------- */
+async function members() {
+  const { data, error } = await db.from('members').select('*').order('name'); if (error) return fail(error);
+  app.innerHTML = hero('Thành viên', `${data.length} người`, '<button class="icon" id="b">← Lịch</button>') +
+    `<main class="fade"><div class="card">${data.map(m => `<div class="mem"><div>${esc(m.name)}<br><span class="mut">${esc(m.phone)}</span></div>${m.phone === me.phone ? '' : `<button class="btn danger sm" data-p="${esc(m.phone)}">Xoá</button>`}</div>`).join('')}</div></main>`;
+  $('#b').onclick = home;
+  app.querySelectorAll('[data-p]').forEach(b => b.onclick = async () => { if (!confirm('Xoá thành viên này?')) return;
+    const { error } = await db.from('members').delete().eq('phone', b.dataset.p); error ? fail(error) : members() });
+}
+
+(async () => {
+  if (me) { const { data } = await db.from('members').select('phone').eq('phone', me.phone).maybeSingle(); if (!data) me = null; } // bị admin xoá → về đăng nhập
+  me ? home() : login();
+})();
+</script>
+</body>
+</html>
