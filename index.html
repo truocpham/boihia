@@ -67,7 +67,7 @@ h2{font-size:20px;line-height:28px;font-weight:800;margin-bottom:16px}
 .bar .g{display:flex;gap:8px}.hero .bar b{max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 [hidden]{display:none!important}.soft .fade{animation:none}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acts .btn{font-size:15px}
-.opt.rank{cursor:default}
+.opt.rank{cursor:default}.g8{display:flex;gap:8px}
 .fade{animation:f .25s ease-out}@keyframes f{from{opacity:0;transform:translateY(8px)}}
 </style>
 </head>
@@ -95,6 +95,7 @@ const hero = (title, sub, left) => `<div class="hero"><div class="bar">${left}<b
 let cur = null, soft = false, vtok = 0, liveOn = false, rtimer;
 const paint = h => { app.innerHTML = h; app.classList.toggle('soft', soft); soft = false };
 const rpc = (fn, a = {}) => db.rpc(fn, { p_pin: localStorage.pin, ...a });
+const mrpc = (fn, a) => rpc(fn, { p_phone: me.phone, ...a });
 const refresh = () => { clearTimeout(rtimer); rtimer = setTimeout(() => { if (me && cur && !document.activeElement?.matches('input,textarea')) { soft = true; cur() } }, 400) };
 const live = () => { if (liveOn) return; liveOn = true; const ch = db.channel('bh'); ['members', 'events', 'rsvps', 'options', 'votes'].forEach(t => ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, refresh)); ch.subscribe() };
 document.addEventListener('visibilitychange', () => !document.hidden && refresh());
@@ -113,25 +114,16 @@ function login() {
   <main class="fade"><form class="card form" id="f">
     <label>Số điện thoại<input id="p" type="tel" inputmode="tel" placeholder="0901234567" autocomplete="tel" required></label>
     <label>Tên của bạn (lần đầu)<input id="n" placeholder="Ví dụ: Hia Tuấn" maxlength="24"></label>
-    <label id="pl" hidden>PIN admin<input id="pin" type="password" inputmode="numeric" autocomplete="off"></label>
+    <label>PIN (4–6 số)<input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Lần đầu: tự đặt PIN của bạn" required minlength="4" maxlength="12"></label>
     <button class="btn">Vào hội</button></form></main>`);
-  $('#p').oninput = () => $('#pl').hidden = norm($('#p').value) !== norm(ADMIN_PHONE);
   $('#f').onsubmit = async e => {
     e.preventDefault();
     const phone = norm($('#p').value), name = $('#n').value.trim();
     if (!/^0\d{9}$/.test(phone)) return toast('Số điện thoại gồm 10 chữ số');
-    if (phone === norm(ADMIN_PHONE)) {
-      const pin = $('#pin').value, { data: ok, error: pe } = await db.rpc('admin_check', { p_pin: pin });
-      if (pe) return fail(pe); if (!ok) return toast('Sai PIN admin');
-      localStorage.pin = pin;
-    }
-    let { data: m, error } = await db.from('members').select('*').eq('phone', phone).maybeSingle();
+    const pin = $('#pin').value;
+    const { data: m, error } = await db.rpc('member_enter', { p_phone: phone, p_name: name, p_pin: pin });
     if (error) return fail(error);
-    if (!m) {
-      if (!name) return toast('Lần đầu cần nhập tên');
-      ({ data: m, error } = await db.from('members').insert({ phone, name }).select().single());
-      if (error) return fail(error);
-    }
+    localStorage.pin = pin;
     me = m; localStorage.me = JSON.stringify(m); home();
   };
 }
@@ -206,12 +198,12 @@ async function event(id) {
   </main>`);
   $('#b').onclick = home; $('#sh').onclick = () => share(e); $('#ca').onclick = () => cal(e);
   app.querySelectorAll('.seg button').forEach(b => b.onclick = async () => {
-    const { error } = await db.from('rsvps').upsert({ event_id: id, phone: me.phone, status: b.dataset.s }); error ? fail(error) : event(id) });
+    const { error } = await mrpc('set_rsvp', { p_event: id, p_status: b.dataset.s }); error ? fail(error) : event(id) });
   app.querySelectorAll('.opt').forEach(o => o.onclick = async () => {
     if (e.vote_closed) return toast('Vote đã chốt');
-    const { error } = await db.from('votes').upsert({ event_id: id, phone: me.phone, option_id: o.dataset.o }); error ? fail(error) : event(id) });
+    const { error } = await mrpc('cast_vote', { p_event: id, p_option: o.dataset.o }); error ? fail(error) : event(id) });
   if (!e.vote_closed) $('#af').onsubmit = async ev => { ev.preventDefault();
-    const { error } = await db.from('options').insert({ event_id: id, label: $('#ol').value.trim(), added_by: me.phone }); error ? fail(error) : event(id) };
+    const { error } = await mrpc('add_option', { p_event: id, p_label: $('#ol').value.trim() }); error ? fail(error) : event(id) };
   if (isAdmin()) {
     $('#ed').onclick = () => form(e);
     $('#cl').onclick = async () => { const { error } = await rpc('admin_set_closed', { p_id: id, p_closed: !e.vote_closed }); error ? fail(error) : event(id) };
@@ -238,14 +230,16 @@ async function members() {
   const k = ++vtok; cur = members;
   const { data, error } = await db.from('members').select('*').order('name'); if (error) return fail(error); if (k !== vtok) return;
   paint(hero('Thành viên', `${data.length} người`, '<button class="icon" id="b">← Lịch</button>') +
-    `<main class="fade"><div class="card">${data.map(m => `<div class="mem"><div>${esc(m.name)}<br><span class="mut">${esc(m.phone)}</span></div>${m.phone === me.phone ? '' : `<button class="btn danger sm" data-p="${esc(m.phone)}">Xoá</button>`}</div>`).join('')}</div></main>`);
+    `<main class="fade"><div class="card">${data.map(m => `<div class="mem"><div>${esc(m.name)}<br><span class="mut">${esc(m.phone)}</span></div>${m.phone === me.phone ? '' : `<div class="g8"><button class="btn ghost sm" data-r="${esc(m.phone)}">Reset PIN</button><button class="btn danger sm" data-p="${esc(m.phone)}">Xoá</button></div>`}</div>`).join('')}</div></main>`);
   $('#b').onclick = home;
+  app.querySelectorAll('[data-r]').forEach(b => b.onclick = async () => { if (!confirm('Reset PIN? Người này sẽ tự đặt PIN mới ở lần đăng nhập tới.')) return;
+    const { error } = await rpc('admin_reset_pin', { p_phone: b.dataset.r }); error ? fail(error) : toast('Đã reset ✓') });
   app.querySelectorAll('[data-p]').forEach(b => b.onclick = async () => { if (!confirm('Xoá thành viên này?')) return;
     const { error } = await rpc('admin_delete_member', { p_phone: b.dataset.p }); error ? fail(error) : members() });
 }
 
 (async () => {
-  if (me && me.phone === norm(ADMIN_PHONE) && !localStorage.pin) me = null; // admin phải nhập PIN
+  if (me && !localStorage.pin) me = null; // bản cũ chưa có PIN → đăng nhập lại
   if (me) { const { data } = await db.from('members').select('phone').eq('phone', me.phone).maybeSingle(); if (!data) me = null; } // bị admin xoá → về đăng nhập
   me ? home() : login();
 })();
