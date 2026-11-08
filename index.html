@@ -25,9 +25,9 @@ body{min-height:100dvh;padding-bottom:calc(var(--s)*12 + env(safe-area-inset-bot
 .wave{position:absolute;left:0;bottom:-1px;width:200%;height:32px;animation:w 9s linear infinite}
 .wave path{fill:var(--bg)}
 @keyframes w{to{transform:translateX(-50%)}}
-main{padding:0 16px;margin-top:-8px;display:grid;gap:16px}
+main{padding:0 16px;margin-top:8px;display:grid;gap:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
-.ev{display:grid;grid-template-columns:56px 1fr auto;gap:16px;align-items:center;cursor:pointer;transition:transform .15s}
+.ev{display:grid;grid-template-columns:56px 1fr;gap:16px;align-items:start;cursor:pointer;transition:transform .15s}
 .ev:active{transform:scale(.98)}
 .date{width:56px;height:64px;border-radius:16px;background:linear-gradient(160deg,var(--aq),var(--bl));color:#031428;text-align:center;display:grid;align-content:center}
 .date b{font-size:24px;line-height:28px;font-weight:800}.date span{font-size:12px;line-height:16px;font-weight:700;text-transform:uppercase}
@@ -148,8 +148,7 @@ async function home() {
   const up = evs.filter(e => +new Date(e.starts_at) >= now), past = evs.filter(e => +new Date(e.starts_at) < now).reverse();
   const card = e => { const d = new Date(e.starts_at); return `<div class="card ev" data-id="${e.id}">
     <div class="date"><b>${d.getDate()}</b><span>Th${d.getMonth() + 1}</span></div>
-    <div><h3>${esc(e.title)}</h3><small>${d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · ${esc(e.place || 'Chưa có địa điểm')}</small><br><small>🏊 ${going[e.id] || 0} người đi${e.vote_closed ? ' · 🍺 đã chốt' : ''}</small></div>
-    ${mine[e.id] ? `<span class="chip ${mine[e.id]}">${LBL[mine[e.id]]}</span>` : '<span class="chip">Chưa trả lời</span>'}</div>` };
+    <div><h3>${esc(e.title)}</h3><small>${d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · ${esc(e.place || 'Chưa có địa điểm')}</small><br><small>🏊 ${going[e.id] || 0} người đi${e.vote_closed ? ' · 🍺 đã chốt' : ''}</small><div style="margin-top:8px">${mine[e.id] ? `<span class="chip ${mine[e.id]}">${LBL[mine[e.id]]}</span>` : '<span class="chip">Chưa trả lời</span>'}</div></div></div>` };
   paint(hero('Lịch bơi', `${up.length} sự kiện sắp tới`,
     `<div class="g"><button class="icon" id="out">Thoát</button><button class="icon" id="top" aria-label="Xếp hạng">🏆</button>${isAdmin() ? '<button class="icon" id="mem" aria-label="Thành viên">👥</button>' : ''}</div>`) +
     `<main class="fade">${up.map(card).join('') || '<div class="card empty">Chưa có sự kiện nào 🌊</div>'}
