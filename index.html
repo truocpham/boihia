@@ -64,6 +64,10 @@ h2{font-size:20px;line-height:28px;font-weight:800;margin-bottom:16px}
 .fab{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:5}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 16px);transform:translate(-50%,-80px);background:var(--card);border:1px solid var(--line);padding:8px 16px;border-radius:99px;font-weight:600;transition:transform .3s;z-index:9}
 .toast.on{transform:translate(-50%,0)}
+.bar .g{display:flex;gap:8px}.hero .bar b{max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[hidden]{display:none!important}.soft .fade{animation:none}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acts .btn{font-size:15px}
+.opt.rank{cursor:default}
 .fade{animation:f .25s ease-out}@keyframes f{from{opacity:0;transform:translateY(8px)}}
 </style>
 </head>
@@ -78,7 +82,7 @@ const $ = s => document.querySelector(s), app = $('#app');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = p => { p = p.replace(/\D/g, ''); return p.startsWith('84') ? '0' + p.slice(2) : p };
 let me = JSON.parse(localStorage.me || 'null');
-const isAdmin = () => me && me.phone === norm(ADMIN_PHONE);
+const isAdmin = () => me && me.phone === norm(ADMIN_PHONE) && !!localStorage.pin;
 const WAVE = '<svg class="wave" viewBox="0 0 1200 32" preserveAspectRatio="none"><path d="M0 16C100 0 200 0 300 16S500 32 600 16s200-16 300 0 200 16 300 0V32H0Z"/></svg>';
 const dt = s => new Date(s).toLocaleString('vi-VN', { weekday: 'short', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
 const LBL = { going: 'Đi', maybe: 'Có thể', no: 'Bận' };
@@ -87,17 +91,40 @@ const toast = m => { const e = $('#toast'); e.textContent = m; e.classList.add('
 const fail = e => toast('Lỗi: ' + (e?.message || 'thử lại nhé'));
 const hero = (title, sub, left) => `<div class="hero"><div class="bar">${left}<b>${esc(me?.name || '')}${isAdmin() ? ' · Admin' : ''}</b></div><h1>${title}</h1>${sub ? `<p>${sub}</p>` : ''}${WAVE}</div>`;
 
+/* ---------- Khung chung ---------- */
+let cur = null, soft = false, vtok = 0, liveOn = false, rtimer;
+const paint = h => { app.innerHTML = h; app.classList.toggle('soft', soft); soft = false };
+const rpc = (fn, a = {}) => db.rpc(fn, { p_pin: localStorage.pin, ...a });
+const refresh = () => { clearTimeout(rtimer); rtimer = setTimeout(() => { if (me && cur && !document.activeElement?.matches('input,textarea')) { soft = true; cur() } }, 400) };
+const live = () => { if (liveOn) return; liveOn = true; const ch = db.channel('bh'); ['members', 'events', 'rsvps', 'options', 'votes'].forEach(t => ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, refresh)); ch.subscribe() };
+document.addEventListener('visibilitychange', () => !document.hidden && refresh());
+const share = async e => { const text = `🏊 ${e.title}\n${dt(e.starts_at)}${e.place ? ' · ' + e.place : ''}`; try { navigator.share ? await navigator.share({ text, url: location.origin }) : (await navigator.clipboard.writeText(text + '\n' + location.origin), toast('Đã copy ✓')) } catch { } };
+const cal = e => {
+  const f = d => new Date(d).toISOString().replace(/[-:]|\.\d{3}/g, ''), x = s => (s || '').replace(/[,;\n\\]/g, ' ');
+  const b = new Blob([['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//BoiHia//VI', 'BEGIN:VEVENT', `UID:${e.id}@boihia`, `DTSTAMP:${f(Date.now())}`, `DTSTART:${f(e.starts_at)}`, `DTEND:${f(+new Date(e.starts_at) + 72e5)}`, `SUMMARY:${x(e.title)}`, `LOCATION:${x(e.place)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n')], { type: 'text/calendar' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'boi-hia.ics'; a.click();
+};
+const logout = () => { localStorage.removeItem('me'); localStorage.removeItem('pin'); me = null; login() };
+
 /* ---------- Đăng nhập ---------- */
 function login() {
-  app.innerHTML = `<div class="hero"><h1>Bơi Hia 🏊</h1><p>Hội bơi lội &amp; bia sau bơi</p>${WAVE}</div>
+  cur = null; vtok++;
+  paint(`<div class="hero"><h1>Bơi Hia 🏊</h1><p>Hội bơi lội &amp; bia sau bơi</p>${WAVE}</div>
   <main class="fade"><form class="card form" id="f">
     <label>Số điện thoại<input id="p" type="tel" inputmode="tel" placeholder="0901234567" autocomplete="tel" required></label>
     <label>Tên của bạn (lần đầu)<input id="n" placeholder="Ví dụ: Hia Tuấn" maxlength="24"></label>
-    <button class="btn">Vào hội</button></form></main>`;
+    <label id="pl" hidden>PIN admin<input id="pin" type="password" inputmode="numeric" autocomplete="off"></label>
+    <button class="btn">Vào hội</button></form></main>`);
+  $('#p').oninput = () => $('#pl').hidden = norm($('#p').value) !== norm(ADMIN_PHONE);
   $('#f').onsubmit = async e => {
     e.preventDefault();
     const phone = norm($('#p').value), name = $('#n').value.trim();
     if (!/^0\d{9}$/.test(phone)) return toast('Số điện thoại gồm 10 chữ số');
+    if (phone === norm(ADMIN_PHONE)) {
+      const pin = $('#pin').value, { data: ok, error: pe } = await db.rpc('admin_check', { p_pin: pin });
+      if (pe) return fail(pe); if (!ok) return toast('Sai PIN admin');
+      localStorage.pin = pin;
+    }
     let { data: m, error } = await db.from('members').select('*').eq('phone', phone).maybeSingle();
     if (error) return fail(error);
     if (!m) {
@@ -111,9 +138,10 @@ function login() {
 
 /* ---------- Danh sách sự kiện ---------- */
 async function home() {
+  const k = ++vtok; cur = home; live();
   const [{ data: evs, error }, { data: rs }] = await Promise.all([
     db.from('events').select('*').order('starts_at'), db.from('rsvps').select('*')]);
-  if (error) return fail(error);
+  if (error) return fail(error); if (k !== vtok) return;
   const mine = Object.fromEntries((rs || []).filter(r => r.phone === me.phone).map(r => [r.event_id, r.status]));
   const going = {}; (rs || []).filter(r => r.status === 'going').forEach(r => going[r.event_id] = (going[r.event_id] || 0) + 1);
   const now = Date.now() - 864e5;
@@ -122,48 +150,52 @@ async function home() {
     <div class="date"><b>${d.getDate()}</b><span>Th${d.getMonth() + 1}</span></div>
     <div><h3>${esc(e.title)}</h3><small>${d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · ${esc(e.place || 'Chưa có địa điểm')}</small><br><small>🏊 ${going[e.id] || 0} người đi${e.vote_closed ? ' · 🍺 đã chốt' : ''}</small></div>
     ${mine[e.id] ? `<span class="chip ${mine[e.id]}">${LBL[mine[e.id]]}</span>` : '<span class="chip">Chưa trả lời</span>'}</div>` };
-  app.innerHTML = hero('Lịch bơi', `${up.length} sự kiện sắp tới`,
-    `<button class="icon" id="out">Thoát</button>${isAdmin() ? '<button class="icon" id="mem">👥 Thành viên</button>' : ''}`) +
+  paint(hero('Lịch bơi', `${up.length} sự kiện sắp tới`,
+    `<div class="g"><button class="icon" id="out">Thoát</button><button class="icon" id="top" aria-label="Xếp hạng">🏆</button>${isAdmin() ? '<button class="icon" id="mem" aria-label="Thành viên">👥</button>' : ''}</div>`) +
     `<main class="fade">${up.map(card).join('') || '<div class="card empty">Chưa có sự kiện nào 🌊</div>'}
     ${past.length ? `<p class="mut" style="margin-top:8px">Đã qua</p>${past.map(card).join('')}` : ''}</main>
-    ${isAdmin() ? '<div class="fab"><button class="btn" id="new">+ Tạo sự kiện</button></div>' : ''}`;
+    ${isAdmin() ? '<div class="fab"><button class="btn" id="new">+ Tạo sự kiện</button></div>' : ''}`);
   app.querySelectorAll('.ev').forEach(c => c.onclick = () => event(c.dataset.id));
-  $('#out').onclick = () => { localStorage.removeItem('me'); me = null; login() };
-  if (isAdmin()) { $('#new').onclick = create; $('#mem').onclick = members }
+  $('#out').onclick = logout; $('#top').onclick = board;
+  if (isAdmin()) { $('#new').onclick = () => form(); $('#mem').onclick = members }
 }
 
-/* ---------- Tạo sự kiện (admin) ---------- */
-function create() {
-  app.innerHTML = hero('Sự kiện mới', '', '<button class="icon" id="b">← Lịch</button>') + `<main class="fade"><form class="card form" id="f">
-    <label>Tên<input id="t" placeholder="Bơi sáng Chủ nhật" required maxlength="60"></label>
-    <label>Ngày giờ<input id="d" type="datetime-local" required></label>
-    <label>Địa điểm<input id="pl" placeholder="Hồ bơi..." maxlength="80"></label>
-    <label>Ghi chú<textarea id="no" maxlength="300"></textarea></label>
-    <button class="btn">Tạo</button></form></main>`;
-  $('#b').onclick = home;
-  $('#f').onsubmit = async e => {
-    e.preventDefault();
-    const { data, error } = await db.from('events').insert({ title: $('#t').value.trim(), starts_at: new Date($('#d').value).toISOString(), place: $('#pl').value.trim(), note: $('#no').value.trim() }).select().single();
-    if (error) return fail(error); toast('Đã tạo ✓'); event(data.id);
+/* ---------- Tạo / sửa sự kiện (admin) ---------- */
+function form(e) {
+  cur = null; vtok++;
+  const loc = e ? new Date(+new Date(e.starts_at) - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 16) : '';
+  paint(hero(e ? 'Sửa sự kiện' : 'Sự kiện mới', '', `<button class="icon" id="b">← ${e ? 'Quay lại' : 'Lịch'}</button>`) + `<main class="fade"><form class="card form" id="f">
+    <label>Tên<input id="t" placeholder="Bơi sáng Chủ nhật" required maxlength="60" value="${esc(e?.title)}"></label>
+    <label>Ngày giờ<input id="d" type="datetime-local" required value="${loc}"></label>
+    <label>Địa điểm<input id="pl" placeholder="Hồ bơi..." maxlength="80" value="${esc(e?.place)}"></label>
+    <label>Ghi chú<textarea id="no" maxlength="300">${esc(e?.note)}</textarea></label>
+    <button class="btn">${e ? 'Lưu' : 'Tạo'}</button></form></main>`);
+  $('#b').onclick = () => e ? event(e.id) : home();
+  $('#f').onsubmit = async ev => {
+    ev.preventDefault();
+    const { data, error } = await rpc('admin_save_event', { p_id: e?.id ?? null, p_title: $('#t').value.trim(), p_starts: new Date($('#d').value).toISOString(), p_place: $('#pl').value.trim(), p_note: $('#no').value.trim() });
+    if (error) return fail(error); toast(e ? 'Đã lưu ✓' : 'Đã tạo ✓'); event(data);
   };
 }
 
 /* ---------- Chi tiết sự kiện + vote bia ---------- */
 async function event(id) {
+  const k = ++vtok; cur = () => event(id);
   const [{ data: e }, { data: rs }, { data: os }, { data: vs }] = await Promise.all([
-    db.from('events').select('*').eq('id', id).single(),
+    db.from('events').select('*').eq('id', id).maybeSingle(),
     db.from('rsvps').select('*, members(name)').eq('event_id', id),
     db.from('options').select('*').eq('event_id', id).order('created_at'),
     db.from('votes').select('*').eq('event_id', id)]);
-  if (!e) return home();
+  if (k !== vtok) return; if (!e) return home();
   const my = rs.find(r => r.phone === me.phone)?.status, myVote = vs.find(v => v.phone === me.phone)?.option_id;
   const cnt = Object.fromEntries(os.map(o => [o.id, vs.filter(v => v.option_id === o.id).length]));
   const max = Math.max(0, ...Object.values(cnt)), total = vs.length || 1;
   const who = s => rs.filter(r => r.status === s).map(r => `<span class="chip ${s}">${esc(r.members?.name)}</span>`).join('') || '<span class="mut">—</span>';
-  app.innerHTML = hero(esc(e.title), `${dt(e.starts_at)} · ${esc(e.place || 'Chưa có địa điểm')}`, '<button class="icon" id="b">← Lịch</button>') +
+  paint(hero(esc(e.title), `${dt(e.starts_at)} · ${esc(e.place || 'Chưa có địa điểm')}`, '<button class="icon" id="b">← Lịch</button>') +
   `<main class="fade">
     ${e.note ? `<div class="card mut">${esc(e.note)}</div>` : ''}
     <div class="card"><h2>Bạn đi không?</h2><div class="seg">${['going', 'maybe', 'no'].map(s => `<button data-s="${s}" class="${my === s ? 'on' : ''}">${{ going: '🏊 Đi', maybe: '🤔 Có thể', no: '😴 Bận' }[s]}</button>`).join('')}</div></div>
+    <div class="acts"><button class="btn ghost" id="sh">📤 Chia sẻ</button><button class="btn ghost" id="ca">📅 Thêm lịch</button></div>
     <div class="card"><h2>Ai đi</h2><div class="people">${who('going')}</div>
       <p class="mut" style="margin:16px 0 8px">Có thể</p><div class="people">${who('maybe')}</div>
       <p class="mut" style="margin:16px 0 8px">Bận</p><div class="people">${who('no')}</div></div>
@@ -171,9 +203,9 @@ async function event(id) {
       ${os.map(o => `<div class="opt ${myVote === o.id ? 'mine' : ''} ${e.vote_closed && cnt[o.id] === max && max ? 'win' : ''}" data-o="${o.id}"><i style="width:${cnt[o.id] / total * 100}%"></i><span>${e.vote_closed && cnt[o.id] === max && max ? '🍺 ' : myVote === o.id ? '✓ ' : ''}${esc(o.label)}</span><span>${cnt[o.id]}</span></div>`).join('') || '<p class="mut" style="margin-bottom:8px">Chưa có lựa chọn. Thêm đi nào!</p>'}
       ${e.vote_closed ? '<p class="mut">Đã chốt vote.</p>' : `<form class="row" id="af" style="margin-top:16px"><input id="ol" placeholder="Quán / giờ..." maxlength="60" required><button class="btn sm">Thêm</button></form>`}
     </div>
-    ${isAdmin() ? `<div class="card form"><button class="btn ghost" id="cl">${e.vote_closed ? 'Mở lại vote' : '🔒 Chốt vote'}</button><button class="btn danger" id="del">Xoá sự kiện</button></div>` : ''}
-  </main>`;
-  $('#b').onclick = home;
+    ${isAdmin() ? `<div class="card form"><button class="btn ghost" id="ed">✏️ Sửa sự kiện</button><button class="btn ghost" id="cl">${e.vote_closed ? 'Mở lại vote' : '🔒 Chốt vote'}</button><button class="btn danger" id="del">Xoá sự kiện</button></div>` : ''}
+  </main>`);
+  $('#b').onclick = home; $('#sh').onclick = () => share(e); $('#ca').onclick = () => cal(e);
   app.querySelectorAll('.seg button').forEach(b => b.onclick = async () => {
     const { error } = await db.from('rsvps').upsert({ event_id: id, phone: me.phone, status: b.dataset.s }); error ? fail(error) : event(id) });
   app.querySelectorAll('.opt').forEach(o => o.onclick = async () => {
@@ -182,26 +214,43 @@ async function event(id) {
   if (!e.vote_closed) $('#af').onsubmit = async ev => { ev.preventDefault();
     const { error } = await db.from('options').insert({ event_id: id, label: $('#ol').value.trim(), added_by: me.phone }); error ? fail(error) : event(id) };
   if (isAdmin()) {
-    $('#cl').onclick = async () => { const { error } = await db.from('events').update({ vote_closed: !e.vote_closed }).eq('id', id); error ? fail(error) : event(id) };
+    $('#ed').onclick = () => form(e);
+    $('#cl').onclick = async () => { const { error } = await rpc('admin_set_closed', { p_id: id, p_closed: !e.vote_closed }); error ? fail(error) : event(id) };
     $('#del').onclick = async () => { if (!confirm('Xoá sự kiện này? Không hoàn tác được.')) return;
-      const { error } = await db.from('events').delete().eq('id', id); error ? fail(error) : home() };
+      const { error } = await rpc('admin_delete_event', { p_id: id }); error ? fail(error) : home() };
   }
+}
+
+/* ---------- Bảng vàng: ai bơi nhiều nhất ---------- */
+async function board() {
+  const k = ++vtok; cur = board;
+  const { data, error } = await db.from('rsvps').select('phone, members(name), events(starts_at)').eq('status', 'going');
+  if (error) return fail(error); if (k !== vtok) return;
+  const now = Date.now(), c = {};
+  data.filter(r => r.events && +new Date(r.events.starts_at) < now).forEach(r => { const x = c[r.phone] ??= { n: r.members?.name, c: 0 }; x.c++ });
+  const rows = Object.values(c).sort((a, b) => b.c - a.c).slice(0, 10), top = rows[0]?.c || 1;
+  paint(hero('Bảng vàng 🏆', 'Ai bơi nhiều nhất', '<button class="icon" id="b">← Lịch</button>') +
+    `<main class="fade"><div class="card">${rows.map((r, i) => `<div class="opt rank${i === 0 ? ' win' : ''}"><i style="width:${r.c / top * 100}%"></i><span>${['🥇', '🥈', '🥉'][i] || (i + 1) + '.'} ${esc(r.n)}</span><span>${r.c} buổi</span></div>`).join('') || '<p class="empty">Chưa có buổi bơi nào đã qua 🌊</p>'}</div></main>`);
+  $('#b').onclick = home;
 }
 
 /* ---------- Thành viên (admin) ---------- */
 async function members() {
-  const { data, error } = await db.from('members').select('*').order('name'); if (error) return fail(error);
-  app.innerHTML = hero('Thành viên', `${data.length} người`, '<button class="icon" id="b">← Lịch</button>') +
-    `<main class="fade"><div class="card">${data.map(m => `<div class="mem"><div>${esc(m.name)}<br><span class="mut">${esc(m.phone)}</span></div>${m.phone === me.phone ? '' : `<button class="btn danger sm" data-p="${esc(m.phone)}">Xoá</button>`}</div>`).join('')}</div></main>`;
+  const k = ++vtok; cur = members;
+  const { data, error } = await db.from('members').select('*').order('name'); if (error) return fail(error); if (k !== vtok) return;
+  paint(hero('Thành viên', `${data.length} người`, '<button class="icon" id="b">← Lịch</button>') +
+    `<main class="fade"><div class="card">${data.map(m => `<div class="mem"><div>${esc(m.name)}<br><span class="mut">${esc(m.phone)}</span></div>${m.phone === me.phone ? '' : `<button class="btn danger sm" data-p="${esc(m.phone)}">Xoá</button>`}</div>`).join('')}</div></main>`);
   $('#b').onclick = home;
   app.querySelectorAll('[data-p]').forEach(b => b.onclick = async () => { if (!confirm('Xoá thành viên này?')) return;
-    const { error } = await db.from('members').delete().eq('phone', b.dataset.p); error ? fail(error) : members() });
+    const { error } = await rpc('admin_delete_member', { p_phone: b.dataset.p }); error ? fail(error) : members() });
 }
 
 (async () => {
+  if (me && me.phone === norm(ADMIN_PHONE) && !localStorage.pin) me = null; // admin phải nhập PIN
   if (me) { const { data } = await db.from('members').select('phone').eq('phone', me.phone).maybeSingle(); if (!data) me = null; } // bị admin xoá → về đăng nhập
   me ? home() : login();
 })();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
