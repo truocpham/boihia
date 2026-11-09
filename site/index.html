@@ -5,7 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bơi Hia — hội bơi, hội bia</title>
 <meta name="description" content="Bơi Hia: lịch bơi, RSVP và vote đi uống bia cho hội bạn bơi. Không cần tài khoản, chỉ cần số điện thoại và PIN.">
-<meta name="theme-color" content="#06142b">
+<meta name="theme-color" content="#06142b" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#eaf6ff" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="Bơi Hia">
+<meta property="og:title" content="Bơi Hia — hội bơi, hội bia">
+<meta property="og:description" content="Hẹn bơi cho gọn, bơi xong đi uống bia cho vui. Miễn phí, không cần tài khoản.">
+<meta property="og:url" content="https://boihia.netlify.app">
+<meta property="og:image" content="https://boihia.netlify.app/icon.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Bơi Hia — hội bơi, hội bia">
+<meta name="twitter:description" content="Hẹn bơi cho gọn, bơi xong đi uống bia cho vui. Miễn phí, không cần tài khoản.">
+<meta name="twitter:image" content="https://boihia.netlify.app/icon.png">
 <link rel="icon" href="../icon.png">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -13,73 +25,100 @@
 <a class="skip" href="#main">Bỏ qua đến nội dung</a>
 
 <header class="hero">
-  <div class="wave" aria-hidden="true">
-    <svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60 Q150 0 300 60 T600 60 T900 60 T1200 60 V120 H0Z"/></svg>
-    <svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 70 Q150 20 300 70 T600 70 T900 70 T1200 70 V120 H0Z"/></svg>
-  </div>
+  <div class="glow g1" aria-hidden="true"></div>
+  <div class="glow g2" aria-hidden="true"></div>
   <div class="wrap hero-grid">
     <div class="hero-text">
-      <p class="eyebrow">🏊 Hội bơi · Hội bia</p>
+      <p class="eyebrow"><span aria-hidden="true">🏊</span> Hội bơi · Hội bia</p>
       <h1>Bơi Hia</h1>
       <p class="lead">Hẹn bơi cho gọn, bơi xong đi uống bia cho vui. Mọi thứ của hội trong một chỗ.</p>
       <a class="btn" href="https://boihia.netlify.app">Tham gia hội</a>
       <p class="note">Miễn phí · Không cần tài khoản</p>
     </div>
-    <div class="phone" role="img" aria-label="Minh họa màn hình ứng dụng Bơi Hia: buổi bơi sáng thứ Bảy với 8 người tham gia và bình chọn bia">
-      <div class="screen" aria-hidden="true">
-        <div class="bar"><b>Bơi Hia</b><span>🌊</span></div>
-        <div class="mock-card">
-          <small>Buổi bơi sắp tới</small>
-          <strong>Thứ Bảy · 6:30 sáng</strong>
-          <div class="chips"><span class="chip on">Đi ✓ 8</span><span class="chip">Bận 2</span></div>
+
+    <div class="stage" role="img" aria-label="Minh họa ba màn hình ứng dụng Bơi Hia: danh sách buổi bơi, chi tiết buổi bơi với nút Đi, Có thể, Bận, và kết quả vote bia">
+      <div class="phone p-left" aria-hidden="true">
+        <div class="screen">
+          <div class="bar"><b>Lịch bơi</b><span>🌊</span></div>
+          <div class="row on"><i>Thứ 7</i><div><strong>Bơi sáng</strong><small>6:30 · Hồ bơi A</small></div><em>8</em></div>
+          <div class="row"><i>CN</i><div><strong>Bơi chiều</strong><small>17:00 · Hồ bơi B</small></div><em>5</em></div>
+          <div class="row"><i>Thứ 4</i><div><strong>Bơi tối</strong><small>19:30 · Hồ bơi A</small></div><em>3</em></div>
         </div>
-        <div class="mock-card">
-          <small>Vote sau bơi</small>
-          <strong>🍺 Đi uống bia?</strong>
-          <div class="meter"><i style="width:78%"></i></div>
-          <small>7/9 phiếu · Chốt kèo!</small>
+      </div>
+      <div class="phone p-right" aria-hidden="true">
+        <div class="screen">
+          <div class="bar"><b>Vote bia</b><span>🍻</span></div>
+          <small class="q">Đi uống ở đâu?</small>
+          <div class="opt win"><span>🍺 Quán Góc Phố</span><b>7</b><u style="width:78%"></u></div>
+          <div class="opt"><span>Bia hơi Ngã Tư</span><b>2</b><u style="width:22%"></u></div>
+          <div class="opt"><span>Hẹn lần sau</span><b>1</b><u style="width:11%"></u></div>
+          <small class="q">🏆 Chốt kèo!</small>
+        </div>
+      </div>
+      <div class="phone p-mid" aria-hidden="true">
+        <div class="screen">
+          <div class="bar"><b>Bơi sáng</b><span>📍</span></div>
+          <div class="hd"><strong>Thứ Bảy · 6:30</strong><small>Hồ bơi A · 8 người đi</small></div>
+          <div class="rsvp">
+            <span class="b go">Đi</span><span class="b">Có thể</span><span class="b">Bận</span>
+          </div>
+          <div class="faces"><i></i><i></i><i></i><i></i><i></i><em>+3</em></div>
+          <div class="bar2"><u style="width:78%"></u></div>
+          <small class="q">8/10 người báo đi</small>
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="waves" aria-hidden="true">
+    <div class="wl w1"><svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60 Q150 0 300 60 T600 60 T900 60 T1200 60 V120 H0Z"/></svg></div>
+    <div class="wl w2"><svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 70 Q150 20 300 70 T600 70 T900 70 T1200 70 V120 H0Z"/></svg></div>
+    <div class="wl w3"><svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 80 Q150 40 300 80 T600 80 T900 80 T1200 80 V120 H0Z"/></svg></div>
   </div>
 </header>
 
 <main id="main">
   <section class="wrap" aria-labelledby="t-feat">
-    <h2 id="t-feat">Có gì trong hội?</h2>
-    <div class="grid3">
-      <article class="card"><span class="ico" aria-hidden="true">📅</span><h3>Lịch bơi &amp; RSVP</h3><p>Ai đi, ai bận, nhìn một cái là rõ. Bấm một nút để báo đi.</p></article>
-      <article class="card"><span class="ico" aria-hidden="true">🍺</span><h3>Vote đi uống bia</h3><p>Bơi xong khát nước? Cả hội vote quán, vote giờ, chốt kèo nhanh.</p></article>
-      <article class="card"><span class="ico" aria-hidden="true">🔑</span><h3>Số điện thoại + PIN</h3><p>Không cần tài khoản, không email. Nhập số và PIN là vào.</p></article>
+    <p class="kicker rv">Tính năng</p>
+    <h2 id="t-feat" class="rv">Có gì trong hội?</h2>
+    <div class="bento">
+      <article class="card big rv"><span class="ico" aria-hidden="true">📅</span><h3>Lịch bơi &amp; RSVP</h3><p>Ai đi, ai bận, nhìn một cái là rõ. Bấm một nút để báo Đi, Có thể hay Bận, cả hội thấy ngay.</p></article>
+      <article class="card rv"><span class="ico" aria-hidden="true">🍺</span><h3>Vote đi uống bia</h3><p>Bơi xong khát nước? Cả hội vote, chốt kèo nhanh.</p></article>
+      <article class="card rv"><span class="ico" aria-hidden="true">🔑</span><h3>Số điện thoại + PIN</h3><p>Không tài khoản, không email. Nhập số và PIN là vào.</p></article>
+      <article class="card rv"><span class="ico" aria-hidden="true">⚡</span><h3>Cập nhật trực tiếp</h3><p>Ai vừa báo đi, bạn thấy liền.</p></article>
+      <article class="card wide rv"><span class="ico" aria-hidden="true">🏆</span><h3>Bảng xếp hạng &amp; thêm vào lịch</h3><p>Ai chăm bơi nhất hội? Lưu buổi bơi vào lịch điện thoại và chia sẻ cho bạn bè chỉ một chạm.</p></article>
     </div>
   </section>
 
   <section class="wrap" aria-labelledby="t-how">
-    <h2 id="t-how">Dùng thế nào?</h2>
+    <p class="kicker rv">Bắt đầu</p>
+    <h2 id="t-how" class="rv">Dùng thế nào?</h2>
     <ol class="steps">
-      <li><span class="n">1</span><h3>Vào hội</h3><p>Nhập số điện thoại và tạo PIN.</p></li>
-      <li><span class="n">2</span><h3>Báo đi bơi</h3><p>Xem lịch và bấm RSVP cho buổi bơi.</p></li>
-      <li><span class="n">3</span><h3>Vote bia</h3><p>Bơi xong, cả hội chốt chỗ ngồi chill.</p></li>
+      <li class="rv"><span class="n">1</span><h3>Vào hội</h3><p>Nhập số điện thoại và tạo PIN.</p></li>
+      <li class="rv"><span class="n">2</span><h3>Báo đi bơi</h3><p>Xem lịch và bấm RSVP cho buổi bơi.</p></li>
+      <li class="rv"><span class="n">3</span><h3>Vote bia</h3><p>Bơi xong, cả hội chốt chỗ ngồi chill.</p></li>
     </ol>
   </section>
 
   <section class="wrap" aria-labelledby="t-beer">
-    <div class="beer">
+    <div class="beer rv">
       <div>
-        <h2 id="t-beer">Bơi xong thì… bia 🍻</h2>
-        <p>Phần vui nhất của hội: mỗi buổi bơi có một phiếu vote “đi uống bia”. Đủ người là chốt, khỏi nhắn nhau cả buổi tối.</p>
+        <p class="kicker">Phần vui nhất</p>
+        <h2 id="t-beer">Bơi xong thì… bia <span aria-hidden="true">🍻</span></h2>
+        <p>Mỗi buổi bơi có một phiếu vote “đi uống bia”. Đủ người là chốt, khỏi nhắn nhau cả buổi tối.</p>
         <a class="btn" href="https://boihia.netlify.app">Vào vote ngay</a>
       </div>
       <div class="mug" aria-hidden="true"><span>🍺</span></div>
     </div>
   </section>
 
-  <section class="wrap" aria-labelledby="t-faq">
-    <h2 id="t-faq">Hỏi nhanh</h2>
-    <details><summary>Có mất tiền không?</summary><p>Không. Bơi Hia là dự án nhỏ cho hội bạn, hoàn toàn miễn phí.</p></details>
-    <details><summary>Cần tài khoản không?</summary><p>Không. Chỉ cần số điện thoại và PIN do bạn đặt.</p></details>
-    <details><summary>Dùng trên điện thoại được không?</summary><p>Được. Mở trên trình duyệt điện thoại và thêm vào màn hình chính như một ứng dụng.</p></details>
-    <details><summary>Ai vào được hội?</summary><p>Hội bạn bè bơi cùng nhau. Cứ bấm “Tham gia hội” để thử.</p></details>
+  <section class="wrap faq" aria-labelledby="t-faq">
+    <p class="kicker rv">Giải đáp</p>
+    <h2 id="t-faq" class="rv">Hỏi nhanh</h2>
+    <details class="rv"><summary>Có mất tiền không?</summary><p>Không. Bơi Hia là dự án nhỏ cho hội bạn, hoàn toàn miễn phí.</p></details>
+    <details class="rv"><summary>Cần tài khoản không?</summary><p>Không. Chỉ cần số điện thoại và PIN do bạn đặt.</p></details>
+    <details class="rv"><summary>Dùng trên điện thoại được không?</summary><p>Được. Mở trên trình duyệt điện thoại và thêm vào màn hình chính như một ứng dụng.</p></details>
+    <details class="rv"><summary>Ai vào được hội?</summary><p>Hội bạn bè bơi cùng nhau. Cứ bấm “Tham gia hội” để thử.</p></details>
   </section>
 </main>
 
