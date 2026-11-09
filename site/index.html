@@ -27,6 +27,7 @@
 <header class="hero">
   <div class="glow g1" aria-hidden="true"></div>
   <div class="glow g2" aria-hidden="true"></div>
+  <div class="bubbles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <div class="wrap hero-grid">
     <div class="hero-text">
       <p class="eyebrow"><span aria-hidden="true">🏊</span> Hội bơi · Hội bia</p>
@@ -106,9 +107,14 @@
         <p class="kicker">Phần vui nhất</p>
         <h2 id="t-beer">Bơi xong thì… bia <span aria-hidden="true">🍻</span></h2>
         <p>Mỗi buổi bơi có một phiếu vote “đi uống bia”. Đủ người là chốt, khỏi nhắn nhau cả buổi tối.</p>
+        <div class="votes" aria-hidden="true">
+          <div class="vb win"><span>Quán Góc Phố</span><b>7</b><u style="--w:.78"></u></div>
+          <div class="vb"><span>Bia hơi Ngã Tư</span><b>2</b><u style="--w:.22"></u></div>
+          <div class="vb"><span>Hẹn lần sau</span><b>1</b><u style="--w:.11"></u></div>
+        </div>
         <a class="btn" href="https://boihia.netlify.app">Vào vote ngay</a>
       </div>
-      <div class="mug" aria-hidden="true"><span>🍺</span></div>
+      <div class="mug" aria-hidden="true"><span>🍺</span><i></i><i></i><i></i><i></i></div>
     </div>
   </section>
 
@@ -125,5 +131,15 @@
 <footer>
   <div class="wrap"><p>Bơi Hia · Dự án học tập, không thương mại.</p></div>
 </footer>
+<script>
+(function(){var d=document,h=d.documentElement;
+if(!('IntersectionObserver'in window)||matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+h.classList.add('js');
+var v=window.CSS&&CSS.supports&&CSS.supports('animation-timeline','view()'),
+o=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');o.unobserve(x.target)}})},{threshold:.2,rootMargin:'0px 0px -6% 0px'});
+d.querySelectorAll(v?'.beer':'.rv,.beer').forEach(function(n){o.observe(n)});
+d.addEventListener('visibilitychange',function(){h.classList.toggle('pz',d.hidden)})
+})();
+</script>
 </body>
 </html>
