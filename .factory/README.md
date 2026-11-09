@@ -24,10 +24,14 @@ Agent routines that run in the cloud and work through GitHub. Rules here apply t
 ## Merging
 A PR may merge only when: the required CI check is green **on the head SHA**, the Reviewer agent commented `[factory:review] reviewed <head sha>: APPROVE`, and no conversation is unresolved. New commits invalidate the review: it must name the latest SHA.
 
-**Owner's choice (2026-11-09): there is no human approval gate on PRs.** One account both authors and would approve, and GitHub does not allow self-approval. The human control is that **deploys are manual**: merged code goes live only when the owner deploys the folder to Netlify. Because of this:
+**Current state (2026-11-09): there is no human approval gate on PRs, and Netlify auto-publishes `main`.** One account both authors and would approve, and GitHub does not allow self-approval. Because merged code goes live on the production site automatically, **the factory must stay stopped** (`factory:stopped`) until the owner adds one of these:
+- a human approver on a second GitHub account (and a required approval in branch protection), or
+- Netlify auto-publish turned off, so a human publishes by hand.
+
+Always, regardless of state:
 - No agent may click GitHub "Approve" or claim human approval. Agent review is a comment, never "human approval".
 - Never add automation that deploys to production.
-- Changes to `.factory/`, `.github/`, `scripts/check.mjs` and `schema.sql` still need the owner to review and merge the PR by hand (the Merge agent must skip PRs touching them).
+- Changes to `.factory/`, `.github/`, `scripts/check.mjs` and `schema.sql` need the owner to review and merge the PR by hand (the Merge agent must skip PRs touching them).
 
 ## Identity
 All routines run as the owner's account (`truocpham`, repo admin). Agents therefore hold admin-capable credentials; rule 3 forbids editing protection, rulesets and secrets, but it cannot be enforced technically. A separate Write-only bot account would fix this; use it when the owner creates one.
