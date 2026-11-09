@@ -28,6 +28,8 @@ A PR may merge only when: the required CI check is green **on the head SHA**, th
 - a human approver on a second GitHub account (and a required approval in branch protection), or
 - Netlify auto-publish turned off, so a human publishes by hand.
 
+On-demand work (for example the Design agent) is allowed under this rule: the owner sets `factory:running` only while the agent works and back to `factory:stopped` right after. Agents open PRs only. **The owner is the only one who merges**: the Merge routine stays disabled and the merge tool is blocked on every other routine. The Netlify deploy preview on each PR is the review surface.
+
 Always, regardless of state:
 - No agent may click GitHub "Approve" or claim human approval. Agent review is a comment, never "human approval".
 - Never add automation that deploys to production.
