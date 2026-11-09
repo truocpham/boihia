@@ -68,6 +68,10 @@ h2{font-size:20px;line-height:28px;font-weight:800;margin-bottom:16px}
 [hidden]{display:none!important}.soft .fade{animation:none}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acts .btn{font-size:15px}
 .opt.rank{cursor:default}.g8{display:flex;gap:8px}
+.lang{display:inline-flex;padding:2px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.08)}
+.lang button{min-width:36px;height:36px;border:0;border-radius:99px;background:transparent;color:var(--tx);font:700 12px/1 inherit;font-family:inherit;letter-spacing:.06em;cursor:pointer}
+.lang button[aria-pressed=true]{background:linear-gradient(90deg,var(--aq),var(--bl));color:#031428}
+.bar .g.r{align-items:center}.icon{white-space:nowrap}.hero .who{color:var(--mut);font-weight:600;font-size:14px;line-height:20px;margin:-8px 0 8px}
 .fade{animation:f .25s ease-out}@keyframes f{from{opacity:0;transform:translateY(8px)}}
 </style>
 </head>
@@ -81,25 +85,33 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = s => document.querySelector(s), app = $('#app');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = p => { p = p.replace(/\D/g, ''); return p.startsWith('84') ? '0' + p.slice(2) : p };
+/* i18n: khoá là chính câu tiếng Việt; thiếu bản dịch thì hiện tiếng Việt */
+let lang = localStorage.lang || ((navigator.language || 'vi').toLowerCase().startsWith('vi') ? 'vi' : 'en');
+document.documentElement.lang = lang;
+const EN = {"Lỗi: ": "Error: ", "thử lại nhé": "please try again", "Sai PIN": "Wrong PIN", "Sai PIN admin": "Wrong admin PIN", "Lần đầu cần nhập tên": "First time: please enter your name", "PIN tối thiểu 4 số": "PIN needs at least 4 digits", "Số điện thoại không hợp lệ": "Invalid phone number", "Vote đã chốt": "Voting is closed", "Lựa chọn không hợp lệ": "Invalid option", "Nhãn 1-60 ký tự": "Label must be 1-60 characters", "Trạng thái sai": "Invalid status", "Đã copy ✓": "Copied ✓", "Hội bơi lội & bia sau bơi": "Swim crew & post-swim beer", "Số điện thoại": "Phone number", "Tên của bạn (lần đầu)": "Your name (first time)", "Ví dụ: Hia Tuấn": "e.g. Hia Tuan", "PIN (4–6 số)": "PIN (4–6 digits)", "Lần đầu: tự đặt PIN của bạn": "First time: choose your own PIN", "Vào hội": "Join in", "Số điện thoại gồm 10 chữ số": "Phone number must be 10 digits", "Lịch bơi": "Swim schedule", "{n} sự kiện sắp tới": "{n} upcoming", "Thoát": "Log out", "Xếp hạng": "Leaderboard", "Thành viên": "Members", "Chưa có địa điểm": "No location yet", "{n} người đi": "{n} going", " · 🍺 đã chốt": " · 🍺 decided", "Chưa trả lời": "No answer yet", "Chưa có sự kiện nào 🌊": "No events yet 🌊", "Đã qua": "Past", "+ Tạo sự kiện": "+ New event", "Đi": "Going", "Có thể": "Maybe", "Bận": "Busy", "Sửa sự kiện": "Edit event", "Sự kiện mới": "New event", "Quay lại": "Back", "Lịch": "Schedule", "Tên": "Title", "Bơi sáng Chủ nhật": "Sunday morning swim", "Ngày giờ": "Date & time", "Địa điểm": "Location", "Hồ bơi...": "Pool...", "Ghi chú": "Notes", "Lưu": "Save", "Tạo": "Create", "Đã lưu ✓": "Saved ✓", "Đã tạo ✓": "Created ✓", "Bạn đi không?": "Are you going?", "🏊 Đi": "🏊 Going", "🤔 Có thể": "🤔 Maybe", "😴 Bận": "😴 Busy", "📤 Chia sẻ": "📤 Share", "📅 Thêm lịch": "📅 Add to calendar", "Ai đi": "Who's going", "🍺 Đi uống bia ở đâu?": "🍺 Where for beer?", "Chưa có lựa chọn. Thêm đi nào!": "No options yet. Add one!", "Đã chốt vote.": "Voting is closed.", "Quán / giờ...": "Place / time...", "Thêm": "Add", "✏️ Sửa sự kiện": "✏️ Edit event", "Mở lại vote": "Reopen vote", "🔒 Chốt vote": "🔒 Close vote", "Xoá sự kiện": "Delete event", "Xoá sự kiện này? Không hoàn tác được.": "Delete this event? This can't be undone.", "Bảng vàng 🏆": "Hall of fame 🏆", "Ai bơi nhiều nhất": "Who swims the most", "{n} buổi": "Swims: {n}", "Chưa có buổi bơi nào đã qua 🌊": "No past swims yet 🌊", "{n} người": "Total: {n}", "Reset PIN": "Reset PIN", "Xoá": "Delete", "Reset PIN? Người này sẽ tự đặt PIN mới ở lần đăng nhập tới.": "Reset PIN? This person will set a new PIN at their next login.", "Xoá thành viên này?": "Delete this member?", "Đã reset ✓": "Reset ✓"};
+const t = (s, v) => { let r = lang === 'vi' ? s : (EN[s] ?? s); if (v) for (const k in v) r = r.replace('{' + k + '}', v[k]); return r };
+const LOC = () => lang === 'vi' ? 'vi-VN' : 'en-GB';
+const langBtn = () => `<span class="lang" role="group" aria-label="Language"><button type="button" data-l="vi" aria-pressed="${lang === 'vi'}">VI</button><button type="button" data-l="en" aria-pressed="${lang === 'en'}">EN</button></span>`;
+const setLang = l => { const keep = ['#p', '#n', '#pin'].map(q => $(q)?.value); lang = l; localStorage.lang = l; document.documentElement.lang = l; (cur || (me ? home : login))(); ['#p', '#n', '#pin'].forEach((q, i) => { if (keep[i] != null && $(q)) $(q).value = keep[i] }) };
 let me = JSON.parse(localStorage.me || 'null');
 const isAdmin = () => me && me.phone === norm(ADMIN_PHONE) && !!localStorage.pin;
 const WAVE = '<svg class="wave" viewBox="0 0 1200 32" preserveAspectRatio="none"><path d="M0 16C100 0 200 0 300 16S500 32 600 16s200-16 300 0 200 16 300 0V32H0Z"/></svg>';
-const dt = s => new Date(s).toLocaleString('vi-VN', { weekday: 'short', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
+const dt = s => new Date(s).toLocaleString(LOC(), { weekday: 'short', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
 const LBL = { going: 'Đi', maybe: 'Có thể', no: 'Bận' };
-let t;
-const toast = m => { const e = $('#toast'); e.textContent = m; e.classList.add('on'); clearTimeout(t); t = setTimeout(() => e.classList.remove('on'), 2200) };
-const fail = e => toast('Lỗi: ' + (e?.message || 'thử lại nhé'));
-const hero = (title, sub, left) => `<div class="hero"><div class="bar">${left}<b>${esc(me?.name || '')}${isAdmin() ? ' · Admin' : ''}</b></div><h1>${title}</h1>${sub ? `<p>${sub}</p>` : ''}${WAVE}</div>`;
+let tt;
+const toast = m => { const e = $('#toast'); e.textContent = m; e.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => e.classList.remove('on'), 2200) };
+const fail = e => toast(t('Lỗi: ') + t(e?.message || 'thử lại nhé'));
+const hero = (title, sub, left) => `<div class="hero"><div class="bar">${left}<div class="g r">${langBtn()}</div></div>${me ? `<p class="who">${esc(me.name)}${isAdmin() ? ' · Admin' : ''}</p>` : ''}<h1>${title}</h1>${sub ? `<p>${sub}</p>` : ''}${WAVE}</div>`;
 
 /* ---------- Khung chung ---------- */
 let cur = null, soft = false, vtok = 0, liveOn = false, rtimer;
-const paint = h => { app.innerHTML = h; app.classList.toggle('soft', soft); soft = false };
+const paint = h => { app.innerHTML = h; app.classList.toggle('soft', soft); soft = false; app.querySelectorAll('.lang button').forEach(b => b.onclick = () => setLang(b.dataset.l)) };
 const rpc = (fn, a = {}) => db.rpc(fn, { p_pin: localStorage.pin, ...a });
 const mrpc = (fn, a) => rpc(fn, { p_phone: me.phone, ...a });
 const refresh = () => { clearTimeout(rtimer); rtimer = setTimeout(() => { if (me && cur && !document.activeElement?.matches('input,textarea')) { soft = true; cur() } }, 400) };
 const live = () => { if (liveOn) return; liveOn = true; const ch = db.channel('bh'); ['members', 'events', 'rsvps', 'options', 'votes'].forEach(t => ch.on('postgres_changes', { event: '*', schema: 'public', table: t }, refresh)); ch.subscribe() };
 document.addEventListener('visibilitychange', () => !document.hidden && refresh());
-const share = async e => { const text = `🏊 ${e.title}\n${dt(e.starts_at)}${e.place ? ' · ' + e.place : ''}`; try { navigator.share ? await navigator.share({ text, url: location.origin }) : (await navigator.clipboard.writeText(text + '\n' + location.origin), toast('Đã copy ✓')) } catch { } };
+const share = async e => { const text = `🏊 ${e.title}\n${dt(e.starts_at)}${e.place ? ' · ' + e.place : ''}`; try { navigator.share ? await navigator.share({ text, url: location.origin }) : (await navigator.clipboard.writeText(text + '\n' + location.origin), toast(t('Đã copy ✓'))) } catch { } };
 const cal = e => {
   const f = d => new Date(d).toISOString().replace(/[-:]|\.\d{3}/g, ''), x = s => (s || '').replace(/[,;\n\\]/g, ' ');
   const b = new Blob([['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//BoiHia//VI', 'BEGIN:VEVENT', `UID:${e.id}@boihia`, `DTSTAMP:${f(Date.now())}`, `DTSTART:${f(e.starts_at)}`, `DTEND:${f(+new Date(e.starts_at) + 72e5)}`, `SUMMARY:${x(e.title)}`, `LOCATION:${x(e.place)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n')], { type: 'text/calendar' });
@@ -110,16 +122,16 @@ const logout = () => { localStorage.removeItem('me'); localStorage.removeItem('p
 /* ---------- Đăng nhập ---------- */
 function login() {
   cur = null; vtok++;
-  paint(`<div class="hero"><h1>Bơi Hia 🏊</h1><p>Hội bơi lội &amp; bia sau bơi</p>${WAVE}</div>
+  paint(`<div class="hero"><div class="bar"><span></span><div class="g r">${langBtn()}</div></div><h1>Bơi Hia 🏊</h1><p>${t('Hội bơi lội & bia sau bơi')}</p>${WAVE}</div>
   <main class="fade"><form class="card form" id="f">
-    <label>Số điện thoại<input id="p" type="tel" inputmode="tel" placeholder="0901234567" autocomplete="tel" required></label>
-    <label>Tên của bạn (lần đầu)<input id="n" placeholder="Ví dụ: Hia Tuấn" maxlength="24"></label>
-    <label>PIN (4–6 số)<input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Lần đầu: tự đặt PIN của bạn" required minlength="4" maxlength="12"></label>
-    <button class="btn">Vào hội</button></form></main>`);
+    <label>${t('Số điện thoại')}<input id="p" type="tel" inputmode="tel" placeholder="0901234567" autocomplete="tel" required></label>
+    <label>${t('Tên của bạn (lần đầu)')}<input id="n" placeholder="${t('Ví dụ: Hia Tuấn')}" maxlength="24"></label>
+    <label>${t('PIN (4–6 số)')}<input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="${t('Lần đầu: tự đặt PIN của bạn')}" required minlength="4" maxlength="12"></label>
+    <button class="btn">${t('Vào hội')}</button></form></main>`);
   $('#f').onsubmit = async e => {
     e.preventDefault();
     const phone = norm($('#p').value), name = $('#n').value.trim();
-    if (!/^0\d{9}$/.test(phone)) return toast('Số điện thoại gồm 10 chữ số');
+    if (!/^0\d{9}$/.test(phone)) return toast(t('Số điện thoại gồm 10 chữ số'));
     const pin = $('#pin').value;
     const { data: m, error } = await db.rpc('member_enter', { p_phone: phone, p_name: name, p_pin: pin });
     if (error) return fail(error);
@@ -139,13 +151,13 @@ async function home() {
   const now = Date.now() - 864e5;
   const up = evs.filter(e => +new Date(e.starts_at) >= now), past = evs.filter(e => +new Date(e.starts_at) < now).reverse();
   const card = e => { const d = new Date(e.starts_at); return `<div class="card ev" data-id="${e.id}">
-    <div class="date"><b>${d.getDate()}</b><span>Th${d.getMonth() + 1}</span></div>
-    <div><h3>${esc(e.title)}</h3><small>${d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · ${esc(e.place || 'Chưa có địa điểm')}</small><br><small>🏊 ${going[e.id] || 0} người đi${e.vote_closed ? ' · 🍺 đã chốt' : ''}</small><div style="margin-top:8px">${mine[e.id] ? `<span class="chip ${mine[e.id]}">${LBL[mine[e.id]]}</span>` : '<span class="chip">Chưa trả lời</span>'}</div></div></div>` };
-  paint(hero('Lịch bơi', `${up.length} sự kiện sắp tới`,
-    `<div class="g"><button class="icon" id="out">Thoát</button><button class="icon" id="top" aria-label="Xếp hạng">🏆</button>${isAdmin() ? '<button class="icon" id="mem" aria-label="Thành viên">👥</button>' : ''}</div>`) +
-    `<main class="fade">${up.map(card).join('') || '<div class="card empty">Chưa có sự kiện nào 🌊</div>'}
-    ${past.length ? `<p class="mut" style="margin-top:8px">Đã qua</p>${past.map(card).join('')}` : ''}</main>
-    ${isAdmin() ? '<div class="fab"><button class="btn" id="new">+ Tạo sự kiện</button></div>' : ''}`);
+    <div class="date"><b>${d.getDate()}</b><span>${lang === 'vi' ? 'Th' + (d.getMonth() + 1) : d.toLocaleString('en-GB', { month: 'short' })}</span></div>
+    <div><h3>${esc(e.title)}</h3><small>${d.toLocaleTimeString(LOC(), { hour: '2-digit', minute: '2-digit' })} · ${esc(e.place || t('Chưa có địa điểm'))}</small><br><small>🏊 ${t('{n} người đi', { n: going[e.id] || 0 })}${e.vote_closed ? t(' · 🍺 đã chốt') : ''}</small><div style="margin-top:8px">${mine[e.id] ? `<span class="chip ${mine[e.id]}">${t(LBL[mine[e.id]])}</span>` : `<span class="chip">${t('Chưa trả lời')}</span>`}</div></div></div>` };
+  paint(hero(t('Lịch bơi'), t('{n} sự kiện sắp tới', { n: up.length }),
+    `<div class="g"><button class="icon" id="out">${t('Thoát')}</button><button class="icon" id="top" aria-label="${t('Xếp hạng')}">🏆</button>${isAdmin() ? `<button class="icon" id="mem" aria-label="${t('Thành viên')}">👥</button>` : ''}</div>`) +
+    `<main class="fade">${up.map(card).join('') || `<div class="card empty">${t('Chưa có sự kiện nào 🌊')}</div>`}
+    ${past.length ? `<p class="mut" style="margin-top:8px">${t('Đã qua')}</p>${past.map(card).join('')}` : ''}</main>
+    ${isAdmin() ? `<div class="fab"><button class="btn" id="new">${t('+ Tạo sự kiện')}</button></div>` : ''}`);
   app.querySelectorAll('.ev').forEach(c => c.onclick = () => event(c.dataset.id));
   $('#out').onclick = logout; $('#top').onclick = board;
   if (isAdmin()) { $('#new').onclick = () => form(); $('#mem').onclick = members }
@@ -155,17 +167,17 @@ async function home() {
 function form(e) {
   cur = null; vtok++;
   const loc = e ? new Date(+new Date(e.starts_at) - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 16) : '';
-  paint(hero(e ? 'Sửa sự kiện' : 'Sự kiện mới', '', `<button class="icon" id="b">← ${e ? 'Quay lại' : 'Lịch'}</button>`) + `<main class="fade"><form class="card form" id="f">
-    <label>Tên<input id="t" placeholder="Bơi sáng Chủ nhật" required maxlength="60" value="${esc(e?.title)}"></label>
-    <label>Ngày giờ<input id="d" type="datetime-local" required value="${loc}"></label>
-    <label>Địa điểm<input id="pl" placeholder="Hồ bơi..." maxlength="80" value="${esc(e?.place)}"></label>
-    <label>Ghi chú<textarea id="no" maxlength="300">${esc(e?.note)}</textarea></label>
-    <button class="btn">${e ? 'Lưu' : 'Tạo'}</button></form></main>`);
+  paint(hero(t(e ? 'Sửa sự kiện' : 'Sự kiện mới'), '', `<button class="icon" id="b">← ${t(e ? 'Quay lại' : 'Lịch')}</button>`) + `<main class="fade"><form class="card form" id="f">
+    <label>${t('Tên')}<input id="t" placeholder="${t('Bơi sáng Chủ nhật')}" required maxlength="60" value="${esc(e?.title)}"></label>
+    <label>${t('Ngày giờ')}<input id="d" type="datetime-local" required value="${loc}"></label>
+    <label>${t('Địa điểm')}<input id="pl" placeholder="${t('Hồ bơi...')}" maxlength="80" value="${esc(e?.place)}"></label>
+    <label>${t('Ghi chú')}<textarea id="no" maxlength="300">${esc(e?.note)}</textarea></label>
+    <button class="btn">${t(e ? 'Lưu' : 'Tạo')}</button></form></main>`);
   $('#b').onclick = () => e ? event(e.id) : home();
   $('#f').onsubmit = async ev => {
     ev.preventDefault();
     const { data, error } = await rpc('admin_save_event', { p_id: e?.id ?? null, p_title: $('#t').value.trim(), p_starts: new Date($('#d').value).toISOString(), p_place: $('#pl').value.trim(), p_note: $('#no').value.trim() });
-    if (error) return fail(error); toast(e ? 'Đã lưu ✓' : 'Đã tạo ✓'); event(data);
+    if (error) return fail(error); toast(t(e ? 'Đã lưu ✓' : 'Đã tạo ✓')); event(data);
   };
 }
 
@@ -182,32 +194,32 @@ async function event(id) {
   const cnt = Object.fromEntries(os.map(o => [o.id, vs.filter(v => v.option_id === o.id).length]));
   const max = Math.max(0, ...Object.values(cnt)), total = vs.length || 1;
   const who = s => rs.filter(r => r.status === s).map(r => `<span class="chip ${s}">${esc(r.members?.name)}</span>`).join('') || '<span class="mut">—</span>';
-  paint(hero(esc(e.title), `${dt(e.starts_at)} · ${esc(e.place || 'Chưa có địa điểm')}`, '<button class="icon" id="b">← Lịch</button>') +
+  paint(hero(esc(e.title), `${dt(e.starts_at)} · ${esc(e.place || t('Chưa có địa điểm'))}`, `<button class="icon" id="b">← ${t('Lịch')}</button>`) +
   `<main class="fade">
     ${e.note ? `<div class="card mut">${esc(e.note)}</div>` : ''}
-    <div class="card"><h2>Bạn đi không?</h2><div class="seg">${['going', 'maybe', 'no'].map(s => `<button data-s="${s}" class="${my === s ? 'on' : ''}">${{ going: '🏊 Đi', maybe: '🤔 Có thể', no: '😴 Bận' }[s]}</button>`).join('')}</div></div>
-    <div class="acts"><button class="btn ghost" id="sh">📤 Chia sẻ</button><button class="btn ghost" id="ca">📅 Thêm lịch</button></div>
-    <div class="card"><h2>Ai đi</h2><div class="people">${who('going')}</div>
-      <p class="mut" style="margin:16px 0 8px">Có thể</p><div class="people">${who('maybe')}</div>
-      <p class="mut" style="margin:16px 0 8px">Bận</p><div class="people">${who('no')}</div></div>
-    <div class="card"><h2>🍺 Đi uống bia ở đâu?</h2>
-      ${os.map(o => `<div class="opt ${myVote === o.id ? 'mine' : ''} ${e.vote_closed && cnt[o.id] === max && max ? 'win' : ''}" data-o="${o.id}"><i style="width:${cnt[o.id] / total * 100}%"></i><span>${e.vote_closed && cnt[o.id] === max && max ? '🍺 ' : myVote === o.id ? '✓ ' : ''}${esc(o.label)}</span><span>${cnt[o.id]}</span></div>`).join('') || '<p class="mut" style="margin-bottom:8px">Chưa có lựa chọn. Thêm đi nào!</p>'}
-      ${e.vote_closed ? '<p class="mut">Đã chốt vote.</p>' : `<form class="row" id="af" style="margin-top:16px"><input id="ol" placeholder="Quán / giờ..." maxlength="60" required><button class="btn sm">Thêm</button></form>`}
+    <div class="card"><h2>${t('Bạn đi không?')}</h2><div class="seg">${['going', 'maybe', 'no'].map(s => `<button data-s="${s}" class="${my === s ? 'on' : ''}">${t({ going: '🏊 Đi', maybe: '🤔 Có thể', no: '😴 Bận' }[s])}</button>`).join('')}</div></div>
+    <div class="acts"><button class="btn ghost" id="sh">${t('📤 Chia sẻ')}</button><button class="btn ghost" id="ca">${t('📅 Thêm lịch')}</button></div>
+    <div class="card"><h2>${t('Ai đi')}</h2><div class="people">${who('going')}</div>
+      <p class="mut" style="margin:16px 0 8px">${t('Có thể')}</p><div class="people">${who('maybe')}</div>
+      <p class="mut" style="margin:16px 0 8px">${t('Bận')}</p><div class="people">${who('no')}</div></div>
+    <div class="card"><h2>${t('🍺 Đi uống bia ở đâu?')}</h2>
+      ${os.map(o => `<div class="opt ${myVote === o.id ? 'mine' : ''} ${e.vote_closed && cnt[o.id] === max && max ? 'win' : ''}" data-o="${o.id}"><i style="width:${cnt[o.id] / total * 100}%"></i><span>${e.vote_closed && cnt[o.id] === max && max ? '🍺 ' : myVote === o.id ? '✓ ' : ''}${esc(o.label)}</span><span>${cnt[o.id]}</span></div>`).join('') || `<p class="mut" style="margin-bottom:8px">${t('Chưa có lựa chọn. Thêm đi nào!')}</p>`}
+      ${e.vote_closed ? `<p class="mut">${t('Đã chốt vote.')}</p>` : `<form class="row" id="af" style="margin-top:16px"><input id="ol" placeholder="${t('Quán / giờ...')}" maxlength="60" required><button class="btn sm">${t('Thêm')}</button></form>`}
     </div>
-    ${isAdmin() ? `<div class="card form"><button class="btn ghost" id="ed">✏️ Sửa sự kiện</button><button class="btn ghost" id="cl">${e.vote_closed ? 'Mở lại vote' : '🔒 Chốt vote'}</button><button class="btn danger" id="del">Xoá sự kiện</button></div>` : ''}
+    ${isAdmin() ? `<div class="card form"><button class="btn ghost" id="ed">${t('✏️ Sửa sự kiện')}</button><button class="btn ghost" id="cl">${t(e.vote_closed ? 'Mở lại vote' : '🔒 Chốt vote')}</button><button class="btn danger" id="del">${t('Xoá sự kiện')}</button></div>` : ''}
   </main>`);
   $('#b').onclick = home; $('#sh').onclick = () => share(e); $('#ca').onclick = () => cal(e);
   app.querySelectorAll('.seg button').forEach(b => b.onclick = async () => {
     const { error } = await mrpc('set_rsvp', { p_event: id, p_status: b.dataset.s }); error ? fail(error) : event(id) });
   app.querySelectorAll('.opt').forEach(o => o.onclick = async () => {
-    if (e.vote_closed) return toast('Vote đã chốt');
+    if (e.vote_closed) return toast(t('Vote đã chốt'));
     const { error } = await mrpc('cast_vote', { p_event: id, p_option: o.dataset.o }); error ? fail(error) : event(id) });
   if (!e.vote_closed) $('#af').onsubmit = async ev => { ev.preventDefault();
     const { error } = await mrpc('add_option', { p_event: id, p_label: $('#ol').value.trim() }); error ? fail(error) : event(id) };
   if (isAdmin()) {
     $('#ed').onclick = () => form(e);
     $('#cl').onclick = async () => { const { error } = await rpc('admin_set_closed', { p_id: id, p_closed: !e.vote_closed }); error ? fail(error) : event(id) };
-    $('#del').onclick = async () => { if (!confirm('Xoá sự kiện này? Không hoàn tác được.')) return;
+    $('#del').onclick = async () => { if (!confirm(t('Xoá sự kiện này? Không hoàn tác được.'))) return;
       const { error } = await rpc('admin_delete_event', { p_id: id }); error ? fail(error) : home() };
   }
 }
@@ -220,8 +232,8 @@ async function board() {
   const now = Date.now(), c = {};
   data.filter(r => r.events && +new Date(r.events.starts_at) < now).forEach(r => { const x = c[r.phone] ??= { n: r.members?.name, c: 0 }; x.c++ });
   const rows = Object.values(c).sort((a, b) => b.c - a.c).slice(0, 10), top = rows[0]?.c || 1;
-  paint(hero('Bảng vàng 🏆', 'Ai bơi nhiều nhất', '<button class="icon" id="b">← Lịch</button>') +
-    `<main class="fade"><div class="card">${rows.map((r, i) => `<div class="opt rank${i === 0 ? ' win' : ''}"><i style="width:${r.c / top * 100}%"></i><span>${['🥇', '🥈', '🥉'][i] || (i + 1) + '.'} ${esc(r.n)}</span><span>${r.c} buổi</span></div>`).join('') || '<p class="empty">Chưa có buổi bơi nào đã qua 🌊</p>'}</div></main>`);
+  paint(hero(t('Bảng vàng 🏆'), t('Ai bơi nhiều nhất'), `<button class="icon" id="b">← ${t('Lịch')}</button>`) +
+    `<main class="fade"><div class="card">${rows.map((r, i) => `<div class="opt rank${i === 0 ? ' win' : ''}"><i style="width:${r.c / top * 100}%"></i><span>${['🥇', '🥈', '🥉'][i] || (i + 1) + '.'} ${esc(r.n)}</span><span>${t('{n} buổi', { n: r.c })}</span></div>`).join('') || `<p class="empty">${t('Chưa có buổi bơi nào đã qua 🌊')}</p>`}</div></main>`);
   $('#b').onclick = home;
 }
 
@@ -229,12 +241,12 @@ async function board() {
 async function members() {
   const k = ++vtok; cur = members;
   const { data, error } = await db.from('members').select('*').order('name'); if (error) return fail(error); if (k !== vtok) return;
-  paint(hero('Thành viên', `${data.length} người`, '<button class="icon" id="b">← Lịch</button>') +
-    `<main class="fade"><div class="card">${data.map(m => `<div class="mem"><div>${esc(m.name)}<br><span class="mut">${esc(m.phone)}</span></div>${m.phone === me.phone ? '' : `<div class="g8"><button class="btn ghost sm" data-r="${esc(m.phone)}">Reset PIN</button><button class="btn danger sm" data-p="${esc(m.phone)}">Xoá</button></div>`}</div>`).join('')}</div></main>`);
+  paint(hero(t('Thành viên'), t('{n} người', { n: data.length }), `<button class="icon" id="b">← ${t('Lịch')}</button>`) +
+    `<main class="fade"><div class="card">${data.map(m => `<div class="mem"><div>${esc(m.name)}<br><span class="mut">${esc(m.phone)}</span></div>${m.phone === me.phone ? '' : `<div class="g8"><button class="btn ghost sm" data-r="${esc(m.phone)}">${t('Reset PIN')}</button><button class="btn danger sm" data-p="${esc(m.phone)}">${t('Xoá')}</button></div>`}</div>`).join('')}</div></main>`);
   $('#b').onclick = home;
-  app.querySelectorAll('[data-r]').forEach(b => b.onclick = async () => { if (!confirm('Reset PIN? Người này sẽ tự đặt PIN mới ở lần đăng nhập tới.')) return;
-    const { error } = await rpc('admin_reset_pin', { p_phone: b.dataset.r }); error ? fail(error) : toast('Đã reset ✓') });
-  app.querySelectorAll('[data-p]').forEach(b => b.onclick = async () => { if (!confirm('Xoá thành viên này?')) return;
+  app.querySelectorAll('[data-r]').forEach(b => b.onclick = async () => { if (!confirm(t('Reset PIN? Người này sẽ tự đặt PIN mới ở lần đăng nhập tới.'))) return;
+    const { error } = await rpc('admin_reset_pin', { p_phone: b.dataset.r }); error ? fail(error) : toast(t('Đã reset ✓')) });
+  app.querySelectorAll('[data-p]').forEach(b => b.onclick = async () => { if (!confirm(t('Xoá thành viên này?'))) return;
     const { error } = await rpc('admin_delete_member', { p_phone: b.dataset.p }); error ? fail(error) : members() });
 }
 

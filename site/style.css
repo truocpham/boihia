@@ -207,3 +207,11 @@ footer{margin-top:calc(var(--s)*12);padding:calc(var(--s)*4) 0;border-top:1px so
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   .rv{opacity:1!important;transform:none!important}
 }
+
+/* language toggle */
+.lang{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:12px;z-index:20;display:flex;padding:3px;border-radius:99px;background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:var(--shadow)}
+.lang button{min-width:44px;min-height:36px;border:0;border-radius:99px;background:transparent;color:var(--text);font:700 13px/1 system-ui,-apple-system,sans-serif;letter-spacing:.06em;cursor:pointer;transition:background .2s,color .2s,transform .15s}
+.lang button:active{transform:scale(.95)}
+.lang button[aria-pressed=true]{background:linear-gradient(90deg,var(--aqua),var(--blue));color:#04162b}
+.lang button:focus-visible{outline:3px solid var(--aqua);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.lang button{transition:none}}
