@@ -11,6 +11,6 @@ Budget: factory total ≤ ~20% of the owner's weekly Claude usage. Minimum sched
 | Architecture | sonnet | weekly Wed 05:00 | read, edit, push `claude/` branches, open PRs | change behavior, add layers |
 | Implementation | sonnet | daily 06:00 | read, edit, push `claude/` branches, open PRs | merge, approve |
 | PR review | sonnet | daily 07:00 | read, `gh api` review/comment | edit or push code |
-| Merge | haiku | daily 08:00 | read, merge via `gh api` | merge unless all gates pass; approve |
+| Merge | haiku | daily 08:00 | read, merge via `gh api` | merge unless all gates pass; approve; merge protected paths |
 
 Production schedules stay disabled until the setup PR is merged, routines use the merged instructions, and the owner authorizes resuming.

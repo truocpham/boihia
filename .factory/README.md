@@ -22,7 +22,12 @@ Agent routines that run in the cloud and work through GitHub. Rules here apply t
 9. **Cost awareness.** Prefer short runs. Do nothing when nothing needs doing and say so in one line.
 
 ## Merging
-A PR may merge only when: required CI check is green, the Reviewer approved **the latest commit** (named by SHA), and the human approver (`@truocpham` via CODEOWNERS) approved the latest commit. New commits invalidate both.
+A PR may merge only when: the required CI check is green **on the head SHA**, the Reviewer agent commented `[factory:review] reviewed <head sha>: APPROVE`, and no conversation is unresolved. New commits invalidate the review: it must name the latest SHA.
+
+**Owner's choice (2026-11-09): there is no human approval gate on PRs.** One account both authors and would approve, and GitHub does not allow self-approval. The human control is that **deploys are manual**: merged code goes live only when the owner deploys the folder to Netlify. Because of this:
+- No agent may click GitHub "Approve" or claim human approval. Agent review is a comment, never "human approval".
+- Never add automation that deploys to production.
+- Changes to `.factory/`, `.github/`, `scripts/check.mjs` and `schema.sql` still need the owner to review and merge the PR by hand (the Merge agent must skip PRs touching them).
 
 ## Identity
-Routines should run as a dedicated bot account with Write access (not admin). The human approver is `@truocpham`; GitHub does not allow the PR author to approve their own PR, so the bot authors and the human approves.
+All routines run as the owner's account (`truocpham`, repo admin). Agents therefore hold admin-capable credentials; rule 3 forbids editing protection, rulesets and secrets, but it cannot be enforced technically. A separate Write-only bot account would fix this; use it when the owner creates one.
