@@ -77,7 +77,7 @@ h2{font-size:20px;line-height:28px;font-weight:800;margin-bottom:16px}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = ((supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const $ = s => document.querySelector(s), app = $('#app');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = p => { p = p.replace(/\D/g, ''); return p.startsWith('84') ? '0' + p.slice(2) : p };
